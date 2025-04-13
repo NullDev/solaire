@@ -3,11 +3,13 @@
 // ========================= //
 
 import { TokenType, isBinaryOperator, getOperatorSymbol } from "../lexer/tokens";
+import { TypeSystem } from "../type/types";
 
 class Parser {
     constructor(tokens){
         this.tokens = tokens;
         this.current = 0;
+        this.typeSystem = new TypeSystem();
     }
 
     parse(){
@@ -55,6 +57,9 @@ class Parser {
                 throw new SyntaxError("Expected type annotation after ':'");
             }
             annotation = typeToken.value;
+            if (!this.typeSystem.isValidType(annotation)){
+                throw new SyntaxError(`Invalid type: ${annotation}`);
+            }
             this.current++;
         }
 
@@ -64,6 +69,17 @@ class Parser {
         this.current++;
 
         const value = this.parseExpression();
+
+        if (!annotation){
+            const inferredType = this.typeSystem.inferType(value);
+            if (inferredType){
+                annotation = inferredType;
+            }
+        }
+
+        if (annotation){
+            this.typeSystem.addVariableType(name.value, annotation);
+        }
 
         if (this.tokens[this.current]?.type !== TokenType.Semicolon){
             throw new SyntaxError("Expected ';' after let declaration");
@@ -156,11 +172,45 @@ class Parser {
             return expression;
         }
 
+        if (token?.type === TokenType.UnaryMinus){
+            this.current++;
+            const right = this.parseFactor();
+            return {
+                type: "UnaryExpression",
+                operator: "-",
+                right,
+            };
+        }
+
         if (token?.type === TokenType.Number){
             this.current++;
             return {
                 type: "NumberLiteral",
                 value: token.value,
+            };
+        }
+
+        if (token?.type === TokenType.String){
+            this.current++;
+            return {
+                type: "StringLiteral",
+                value: token.value,
+            };
+        }
+
+        if (token?.type === TokenType.Char){
+            this.current++;
+            return {
+                type: "CharLiteral",
+                value: token.value,
+            };
+        }
+
+        if (token?.type === TokenType.True || token?.type === TokenType.False){
+            this.current++;
+            return {
+                type: "BooleanLiteral",
+                value: token.type === TokenType.True,
             };
         }
 
@@ -172,7 +222,7 @@ class Parser {
             };
         }
 
-        throw new SyntaxError(`Expected number, identifier, or '(', got ${token?.type}`);
+        throw new SyntaxError(`Expected number, string, character, boolean, identifier, or '(', got ${token?.type}`);
     }
 
     match(type){
