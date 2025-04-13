@@ -41,4 +41,20 @@ const test = async function(input){
 test(`
 let x = 3 + 4;
 print(x * 2);
+
+let a: Int = 1;
+let b: Float = 1.2;
+let c: String = "aaaa";
+let d: Char = 'c';
+let e: Bool = true;
+
+print(a);
+print(b);
+print(c);
+print(d);
+print(e);
+
+let f: Int = a + 5;
+
+print(f);
 `);
