@@ -6,6 +6,7 @@ export const TokenType = {
     Number: "Number",
     Plus: "Plus",
     Minus: "Minus",
+    UnaryMinus: "UnaryMinus",
     Multiply: "Multiply",
     LeftParen: "LeftParen",
     RightParen: "RightParen",
@@ -15,6 +16,10 @@ export const TokenType = {
     Semicolon: "Semicolon",
     Colon: "Colon",
     Equals: "Equals",
+    String: "String",
+    Char: "Char",
+    True: "True",
+    False: "False",
 };
 
 export const BinaryOperators = {
@@ -27,6 +32,8 @@ export const BinaryOperators = {
 export const Keywords = {
     let: TokenType.Let,
     print: TokenType.Print,
+    "true": TokenType.True,
+    "false": TokenType.False,
 };
 
 export const Parentheses = {
